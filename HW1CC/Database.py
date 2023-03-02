@@ -24,3 +24,38 @@ def createTables():
                      "age INT, position VARCHAR(255), shirt_number VARCHAR(255) , team_id INT, FOREIGN KEY (team_id) "
                      "REFERENCES teams(id))")
 
+def getTeams():
+    mydb = connect()
+
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT * FROM teams")
+
+    myresult = mycursor.fetchall()
+
+    return myresult
+
+
+def getTeamById(id):
+    mydb = connect()
+
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT * FROM teams WHERE id = " + id)
+
+    myresult = mycursor.fetchone()
+
+    return myresult
+
+def createTeam(name, founded, stadium):
+    mydb = connect()
+
+    mycursor = mydb.cursor()
+
+    sql = "INSERT INTO teams (name, founded, stadium) VALUES (%s, %s, %s)"
+    val = (name, founded, stadium)
+    mycursor.execute(sql, val)
+
+    mydb.commit()
+
+    return mycursor.lastrowid
