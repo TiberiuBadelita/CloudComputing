@@ -24,6 +24,7 @@ def createTables():
                      "age INT, position VARCHAR(255), shirt_number VARCHAR(255) , team_id INT, FOREIGN KEY (team_id) "
                      "REFERENCES teams(id))")
 
+
 def getTeams():
     mydb = connect()
 
@@ -47,6 +48,7 @@ def getTeamById(id):
 
     return myresult
 
+
 def createTeam(name, founded, stadium):
     mydb = connect()
 
@@ -54,6 +56,84 @@ def createTeam(name, founded, stadium):
 
     sql = "INSERT INTO teams (name, founded, stadium) VALUES (%s, %s, %s)"
     val = (name, founded, stadium)
+    mycursor.execute(sql, val)
+
+    mydb.commit()
+
+    return mycursor.lastrowid
+
+
+def updateTeam(id, name, founded, stadium):
+    mydb = connect()
+
+    mycursor = mydb.cursor()
+
+    sql = "UPDATE teams SET name = %s, founded = %s, stadium = %s WHERE id = %s"
+    val = (name, founded, stadium, id)
+    mycursor.execute(sql, val)
+
+    mydb.commit()
+
+    return mycursor.lastrowid
+
+
+def getPlayers():
+    mydb = connect()
+
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT * FROM players")
+
+    myresult = mycursor.fetchall()
+
+    return myresult
+
+
+def getPlayersByTeamId(id):
+    mydb = connect()
+
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT * FROM players WHERE team_id = " + id)
+
+    myresult = mycursor.fetchall()
+
+    return myresult
+
+
+def getPlayerById(id):
+    mydb = connect()
+
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT * FROM players WHERE id = " + id)
+
+    myresult = mycursor.fetchone()
+
+    return myresult
+
+
+def createPlayer(name, age, position, shirt_number, team_id):
+    mydb = connect()
+
+    mycursor = mydb.cursor()
+
+    sql = "INSERT INTO players (name, age, position, shirt_number, team_id) VALUES (%s, %s, %s, %s, %s)"
+    val = (name, age, position, shirt_number, team_id)
+    mycursor.execute(sql, val)
+
+    mydb.commit()
+
+    return mycursor.lastrowid
+
+
+def updatePlayer(id, name, age, position, shirt_number, team_id):
+    mydb = connect()
+
+    mycursor = mydb.cursor()
+
+    sql = "UPDATE players SET name = %s, age = %s, position = %s, shirt_number = %s, team_id = %s WHERE id = %s"
+    val = (name, age, position, shirt_number, team_id, id)
     mycursor.execute(sql, val)
 
     mydb.commit()
