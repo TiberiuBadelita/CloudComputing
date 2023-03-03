@@ -22,7 +22,7 @@ def createTables():
 
     mycursor.execute("CREATE TABLE IF NOT EXISTS players (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), "
                      "age INT, position VARCHAR(255), shirt_number VARCHAR(255) , team_id INT, FOREIGN KEY (team_id) "
-                     "REFERENCES teams(id))")
+                     "REFERENCES teams(id) ON DELETE CASCADE)")
 
 
 def getTeams():
@@ -70,6 +70,20 @@ def updateTeam(id, name, founded, stadium):
 
     sql = "UPDATE teams SET name = %s, founded = %s, stadium = %s WHERE id = %s"
     val = (name, founded, stadium, id)
+    mycursor.execute(sql, val)
+
+    mydb.commit()
+
+    return mycursor.lastrowid
+
+
+def deleteTeam(id):
+    mydb = connect()
+
+    mycursor = mydb.cursor()
+
+    sql = "DELETE FROM teams WHERE id = %s"
+    val = (id,)
     mycursor.execute(sql, val)
 
     mydb.commit()
@@ -134,6 +148,20 @@ def updatePlayer(id, name, age, position, shirt_number, team_id):
 
     sql = "UPDATE players SET name = %s, age = %s, position = %s, shirt_number = %s, team_id = %s WHERE id = %s"
     val = (name, age, position, shirt_number, team_id, id)
+    mycursor.execute(sql, val)
+
+    mydb.commit()
+
+    return mycursor.lastrowid
+
+
+def deletePlayer(id):
+    mydb = connect()
+
+    mycursor = mydb.cursor()
+
+    sql = "DELETE FROM players WHERE id = %s"
+    val = (id,)
     mycursor.execute(sql, val)
 
     mydb.commit()

@@ -1,5 +1,6 @@
+import Database
+import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import json, Database
 
 
 class APIHandler(BaseHTTPRequestHandler):
@@ -30,9 +31,6 @@ class APIHandler(BaseHTTPRequestHandler):
             self.wfile.write(response.encode())
 
     def handle_teams(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
 
         response = Database.getTeams()
 
@@ -45,6 +43,10 @@ class APIHandler(BaseHTTPRequestHandler):
                 'stadium': team[3]
             })
 
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+
         json_response = {'teams': json_response}
 
         self.wfile.write(json.dumps(json_response).encode())
@@ -56,6 +58,12 @@ class APIHandler(BaseHTTPRequestHandler):
 
         response = Database.getTeamById(team_id)
 
+        if response is None:
+            self.send_response(404)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            return
+
         json_response = {
             'id': response[0],
             'name': response[1],
@@ -66,9 +74,14 @@ class APIHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(json_response).encode())
 
     def handle_players(self, team_id):
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
+
+        team = Database.getTeamById(team_id)
+
+        if team is None:
+            self.send_response(404)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            return
 
         response = Database.getPlayersByTeamId(team_id)
 
@@ -84,14 +97,15 @@ class APIHandler(BaseHTTPRequestHandler):
                 'team_id': player[5]
             })
 
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+
         json_response = {'players': json_response}
 
         self.wfile.write(json.dumps(json_response).encode())
 
     def handle_player(self, team_id, player_id):
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
 
         response = Database.getPlayerById(player_id)
 
@@ -106,6 +120,10 @@ class APIHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             return
+
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
 
         json_response = {
             'id': response[0],
@@ -130,29 +148,71 @@ class APIHandler(BaseHTTPRequestHandler):
                     self.handle_create_player(self.path.split('/')[2])
 
     def handle_create_team(self):
-        self.send_response(201)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
 
         content_length = int(self.headers['Content-Length'])
         body = self.rfile.read(content_length)
         data = json.loads(body)
 
+        for key in data:
+            if key not in ['name', 'founded', 'stadium']:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                return
+
+        teams = Database.getTeams()
+
+        for team in teams:
+            if team[1] == data['name']:
+                self.send_response(409, 'Team already exists')
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                return
+
         Database.createTeam(data['name'], data['founded'], data['stadium'])
+
+        self.send_response(201)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
 
         response = {'message': 'team created'}
         self.wfile.write(json.dumps(response).encode())
 
     def handle_create_player(self, team_id):
-        self.send_response(201)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
 
         content_length = int(self.headers['Content-Length'])
         body = self.rfile.read(content_length)
         data = json.loads(body)
 
+        team = Database.getTeamById(team_id)
+
+        if team is None:
+            self.send_response(404)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            return
+
+        for key in data:
+            if key not in ['name', 'age', 'position', 'shirt_number']:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                return
+
+        players = Database.getPlayersByTeamId(team_id)
+
+        for player in players:
+            if player[1] == data['name']:
+                self.send_response(409, 'Player already exists')
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                return
+
         Database.createPlayer(data['name'], data['age'], data['position'], data['shirt_number'], team_id)
+
+        self.send_response(201)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
 
         response = {'message': 'player created'}
         self.wfile.write(json.dumps(response).encode())
@@ -161,7 +221,8 @@ class APIHandler(BaseHTTPRequestHandler):
 
     def do_PUT(self):
         if self.path.split('/')[1] == 'team':
-            self.handle_update_team(self.path.split('/')[2])
+            if len(self.path.split('/')) == 3:
+                self.handle_update_team(self.path.split('/')[2])
 
         if self.path.startswith('/team/'):
             if len(self.path.split('/')) > 3:
@@ -169,9 +230,6 @@ class APIHandler(BaseHTTPRequestHandler):
                     self.handle_update_player(self.path.split('/')[2], self.path.split('/')[4])
 
     def handle_update_team(self, team_id):
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
 
         content_length = int(self.headers['Content-Length'])
         body = self.rfile.read(content_length)
@@ -192,6 +250,15 @@ class APIHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 return
 
+        teams = Database.getTeams()
+
+        for team in teams:
+            if team[1] == data['name']:
+                self.send_response(409, 'Team already exists')
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                return
+
         if 'name' not in data:
             data['name'] = team[1]
 
@@ -203,21 +270,129 @@ class APIHandler(BaseHTTPRequestHandler):
 
         Database.updateTeam(team_id, data['name'], data['founded'], data['stadium'])
 
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+
         response = {'message': 'team updated'}
         self.wfile.write(json.dumps(response).encode())
 
     def handle_update_player(self, team_id, player_id):
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
 
         content_length = int(self.headers['Content-Length'])
         body = self.rfile.read(content_length)
         data = json.loads(body)
 
-        Database.updatePlayer(player_id, data['name'], data['age'], data['position'], data['shirt_number'], team_id)
+        player = Database.getPlayerById(player_id)
+
+        if player is None:
+            self.send_response(404)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            return
+
+        if str(player[5]) != team_id:
+            self.send_response(404)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            return
+
+        for key in data:
+            if key not in ['name', 'age', 'position', 'shirt_number', 'team_id']:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                return
+
+        players = Database.getPlayersByTeamId(team_id)
+
+        for player in players:
+            if player[1] == data['name']:
+                self.send_response(409, 'Player already exists')
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                return
+
+        if 'name' not in data:
+            data['name'] = player[1]
+
+        if 'age' not in data:
+            data['age'] = player[2]
+
+        if 'position' not in data:
+            data['position'] = player[3]
+
+        if 'shirt_number' not in data:
+            data['shirt_number'] = player[4]
+
+        if 'team_id' not in data:
+            data['team_id'] = player[5]
+
+        Database.updatePlayer(player_id, data['name'], data['age'], data['position'], data['shirt_number'],
+                              data['team_id'])
+
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
 
         response = {'message': 'player updated'}
+        self.wfile.write(json.dumps(response).encode())
+
+        # ---------------------------- DELETE -----------------------------
+
+    def do_DELETE(self):
+
+        if self.path.split('/')[1] == 'team':
+            if len(self.path.split('/')) == 3:
+                self.handle_delete_team(self.path.split('/')[2])
+
+        if self.path.startswith('/team/'):
+            if len(self.path.split('/')) > 3:
+                if self.path.split('/')[3] == 'player':
+                    self.handle_delete_player(self.path.split('/')[2], self.path.split('/')[4])
+
+    def handle_delete_team(self, team_id):
+
+        team = Database.getTeamById(team_id)
+
+        if team is None:
+            self.send_response(404)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            return
+
+        Database.deleteTeam(team_id)
+
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+
+        response = {'message': 'team deleted'}
+        self.wfile.write(json.dumps(response).encode())
+
+    def handle_delete_player(self, team_id, player_id):
+
+        player = Database.getPlayerById(player_id)
+
+        if player is None:
+            self.send_response(404)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            return
+
+        if str(player[5]) != team_id:
+            self.send_response(404)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            return
+
+        Database.deletePlayer(player_id)
+
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+
+        response = {'message': 'player deleted'}
         self.wfile.write(json.dumps(response).encode())
 
 
