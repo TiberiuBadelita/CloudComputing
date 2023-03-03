@@ -30,6 +30,8 @@ class APIHandler(BaseHTTPRequestHandler):
             response = '<html><body><h1 align="center">Welcome to FOOTBALL TEAMS MANAGER API!</h1></body></html>'
             self.wfile.write(response.encode())
 
+        self.send_response(404)
+
     def handle_teams(self):
 
         response = Database.getTeams()
@@ -147,6 +149,8 @@ class APIHandler(BaseHTTPRequestHandler):
                 if self.path.split('/')[3] == 'player':
                     self.handle_create_player(self.path.split('/')[2])
 
+        self.send_response(404)
+
     def handle_create_team(self):
 
         content_length = int(self.headers['Content-Length'])
@@ -228,6 +232,8 @@ class APIHandler(BaseHTTPRequestHandler):
             if len(self.path.split('/')) > 3:
                 if self.path.split('/')[3] == 'player':
                     self.handle_update_player(self.path.split('/')[2], self.path.split('/')[4])
+
+        self.send_response(404)
 
     def handle_update_team(self, team_id):
 
@@ -350,6 +356,8 @@ class APIHandler(BaseHTTPRequestHandler):
             if len(self.path.split('/')) > 3:
                 if self.path.split('/')[3] == 'player':
                     self.handle_delete_player(self.path.split('/')[2], self.path.split('/')[4])
+
+        self.send_response(404)
 
     def handle_delete_team(self, team_id):
 
