@@ -258,15 +258,15 @@ class APIHandler(BaseHTTPRequestHandler):
 
         teams = Database.getTeams()
 
-        for team in teams:
-            if team[1] == data['name']:
-                self.send_response(409, 'Team already exists')
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                return
-
         if 'name' not in data:
             data['name'] = team[1]
+        else:
+            for team in teams:
+                if team[1] == data['name']:
+                    self.send_response(409, 'Team already exists')
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    return
 
         if 'founded' not in data:
             data['founded'] = team[2]
@@ -312,15 +312,15 @@ class APIHandler(BaseHTTPRequestHandler):
 
         players = Database.getPlayersByTeamId(team_id)
 
-        for player in players:
-            if player[1] == data['name']:
-                self.send_response(409, 'Player already exists')
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                return
-
         if 'name' not in data:
             data['name'] = player[1]
+        else:
+            for player in players:
+                if player[1] == data['name']:
+                    self.send_response(409, 'Player already exists')
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    return
 
         if 'age' not in data:
             data['age'] = player[2]
