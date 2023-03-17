@@ -1,24 +1,18 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
 
 
 const HomePage = () => {
-  const Competitions = [
-    {
-      id: '01',
-      name: 'Cupa Nikodemus',
-      data_inceput: '20/07/2023',
-      data_final: '25/07/2023'
-    },
-    {
-      id: '02',
-      name: 'Cupa Vicov',
-      data_inceput: '20/07/2023',
-      data_final: '25/07/2023'
-    },
-  ];
+  const [Competitions, setCompetitions] = useState([]);
   const navigate= useNavigate();
+  const url = 'http://127.0.0.1:5000/competitions';
+  useEffect(() => {
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {setCompetitions(data.competitions);});
+    }, []);
   return (
     <ul>
       {Competitions.map((data) => (
@@ -26,7 +20,7 @@ const HomePage = () => {
           <button class = "button" onClick={() => navigate(`/competition/${data.id}`)}>
             <p> || {data.name} || </p>
             <p>Data desfasurarii:</p>
-            <p>{data.data_inceput} - {data.data_final}</p>
+            <p>{data.start_date} - {data.end_date}</p>
           </button>
         </li>
       ))}

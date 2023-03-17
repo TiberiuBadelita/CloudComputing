@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from './Navbar.js';
 import CompetitionPage from './CompetitionPage';
 import Teams from './Teams';
+import TeamPage from './TeamPage';
 
 
 const App = () => {
@@ -17,6 +18,8 @@ const App = () => {
           <Route path="create-cup" element={<CreateCup />} />
           <Route path="teams" element={<Teams />} />
           <Route path="competition/:id" element={<CompetitionPage />} />
+          <Route path="team/:id" element={<TeamPage/>} />
+          <Route path="*" element={<h1>404: Not Found</h1>} />
       </Routes>
     </BrowserRouter>
   );

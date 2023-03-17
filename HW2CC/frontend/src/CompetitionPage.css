@@ -1,0 +1,30 @@
+.rowView{
+    display: flex;
+    flex-direction: row;
+ 
+    justify-content: space-between;
+    align-items: center;
+    align-content: center;
+}
+
+input[type="number"] {
+    width: 2em;
+  }
+
+.buttonScore {
+    display: inline-block;
+    top: 10px;
+    padding: 5px 15px;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    background-color: #4c72af;
+    border: none;
+    border-radius: 15px;
+   
+  }
+  
+.buttonScore:hover {background-color: #224761}

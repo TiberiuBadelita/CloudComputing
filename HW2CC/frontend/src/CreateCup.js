@@ -2,6 +2,7 @@ import React from 'react';
 import './CreateCup.css';
 import './HomePage.css';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 
 const CreateCup= () => {
@@ -11,9 +12,35 @@ const CreateCup= () => {
   const [endDate, setEndDate] = useState('');
   const [details, setDetails] = useState('');
 
+ const url = 'http://127.0.0.1:5000/competition';
+ const nav = useNavigate();
+
   function handleSubmit(e) {
     e.preventDefault();
-    // handle form submission
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: cupName,
+        num_teams: numTeams,
+        start_date: startDate,
+        end_date: endDate,
+        details: details,
+      }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+      }
+      )
+      .catch((error) => {
+        console.error('Error:', error);
+      }
+      );
+      
+      nav('/');
   }
 
   return (
@@ -38,7 +65,7 @@ const CreateCup= () => {
         Details:
         <textarea value={details} onChange={e => setDetails(e.target.value)} />
       </label>
-      <button type="submit" class = "button">Generate CUP</button>
+      <button type="submit" class = "button">Create CUP</button>
     </form>
   );
 };

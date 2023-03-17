@@ -10,14 +10,13 @@ li {
   }
 
   .button {
-   
-
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    top: 10px;
     margin: auto;
     padding: 15px 25px;
-    font-size: 20px;
+    font-size: 25px;
     cursor: pointer;
     text-align: center;
     text-decoration: none;
@@ -30,3 +29,9 @@ li {
   }
   
   .button:hover {background-color: #224761}
+
+  .buttonView{
+    display:flex;
+    flex-direction: 'row';
+    justify-content: 'space-between';
+  }
