@@ -1,4 +1,5 @@
 import requests, json
+from config import API_KEYS
 
 
 def shuffle_teams(teams):
@@ -6,7 +7,7 @@ def shuffle_teams(teams):
         "jsonrpc": "2.0",
         "method": "generateIntegerSequences",
         "params": {
-            "apiKey": "d6eefee9-1e35-4324-b3c3-02f70e966cf2",
+            "apiKey": API_KEYS['API_KEY_1'],
             "n": 1,
             "length": [len(teams)],
             "min": [1],
